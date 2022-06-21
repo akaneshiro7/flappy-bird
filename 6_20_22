@@ -1,0 +1,177 @@
+import pygame
+from pygame.locals import *
+import random
+
+from Bird import Bird
+
+pygame.init()
+
+
+clock = pygame.time.Clock()
+# Create Window Variables
+WINDOW_WIDTH = 864
+WINDOW_HEIGHT = 936
+MIDDLE_WIDTH = WINDOW_WIDTH // 2
+
+# Create Window
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption('Flappy Bird')
+
+# Create Game Variables
+ground_coordinate = 0
+scroll = 4
+FPS = 60
+is_flying = False
+game_over = False
+gravity = 10
+pipe_gap = 200
+time_since_last_pipe = 1500
+last_pipe = pygame.time.get_ticks() - time_since_last_pipe
+score = 0
+pass_pipe = False
+WHITE = (255, 255, 255)
+font = pygame.font.SysFont('arial', 60)
+
+# Load Images
+background = pygame.image.load('img/bg.png')
+ground = pygame.image.load('img/ground.png')
+
+
+def draw_score(score, font):
+    img = font.render(score, True, WHITE)
+    window.blit(img, (MIDDLE_WIDTH, 50))
+
+def draw_background(window, background):
+    window.blit(background, (0, 0))
+
+def draw_ground(window, ground):
+    window.blit(ground, (ground_coordinate, 768))
+
+
+class Bird(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('img/bird1.png')
+
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+        self.vel = 0
+
+    def update(self):
+        if is_flying:
+            # gravity
+            self.vel += 0.5
+            if self.vel > 10:
+                self.vel = 10
+            self.rect.y += int(self.vel)
+
+            if self.rect.bottom == 768:
+                self.rect.bottom = 768
+
+        if game_over is True and self.rect.bottom <= 768:
+            self.vel = 20
+            self.image = pygame.transform.rotate (self.image, -90)
+            self.rect.y += self.vel
+
+    def jump(self):
+        self.vel = -8
+
+class Pipe(pygame.sprite.Sprite):
+    def __init__(self, x, y, position):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('img/pipe.png')
+        self.rect = self.image.get_rect()
+
+        if position == 'top':
+            self.image = pygame.transform.flip(self.image, False, True)
+            self.rect.bottomleft = [x, y - (pipe_gap / 2)]
+
+        if position == 'bottom':
+            self.rect.topleft = [x, y + (pipe_gap // 2)]
+
+
+    def update(self):
+        self.rect.x -= scroll
+        if self.rect.right < 0:
+            self.kill()
+
+def create_pipe():
+    pipe_height = random.randint(-100, 100)
+    bottom_pipe = Pipe(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + pipe_height, 'bottom')
+    top_pipe = Pipe(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + pipe_height, 'top')
+    pipe_group.add(bottom_pipe)
+    pipe_group.add(top_pipe)
+
+
+bird_group = pygame.sprite.Group()
+pipe_group = pygame.sprite.Group()
+
+flappy = Bird(100, MIDDLE_WIDTH)
+
+bird_group.add(flappy)
+
+if __name__ == '__main__':
+    run = True
+    while run is True:
+
+        clock.tick(60)
+
+        pipe_group.draw(window)
+
+        if len(pipe_group) > 0:
+            if flappy.rect.left > pipe_group.sprites()[0].rect.left\
+                and flappy.rect.right < pipe_group.sprites()[0].rect.right\
+                and pass_pipe is False:
+                pass_pipe = True
+            if pass_pipe is True:
+                if flappy.rect.left > pipe_group.sprites()[0].rect.right:
+                    score += 1
+                    pass_pipe = False
+
+
+
+        # draw background
+        draw_background(window, background)
+
+        pipe_group.draw(window)
+
+        # animate ground
+        draw_ground(window, ground)
+        if is_flying:
+            ground_coordinate -= scroll
+            if ground_coordinate == -36:
+                ground_coordinate = 0
+
+            current_time = pygame.time.get_ticks()
+            if current_time - last_pipe > time_since_last_pipe:
+                create_pipe()
+                last_pipe = current_time
+
+            pipe_group.update()
+
+        bird_group.draw(window)
+        bird_group.update()
+        if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
+            game_over = True
+            is_flying = False
+        # check if bird is on ground
+        if flappy.rect.bottom >= 768:
+            game_over = True
+            is_flying = False
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == K_ESCAPE:
+                    run = False
+                if event.key == K_SPACE:
+                    if is_flying is False and game_over is False:
+                        is_flying = True
+                    if is_flying and game_over is False:
+                        flappy.jump()
+
+        draw_score(str(score), font)
+
+        pygame.display.update()
+    pygame.quit()
