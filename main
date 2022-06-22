@@ -39,10 +39,17 @@ background = pygame.image.load('img/bg.png')
 ground = pygame.image.load('img/ground.png')
 restart_button_img = pygame.image.load('img/restart.png')
 game_over_img = pygame.image.load('img/gameover.png')
-antigravity_button_img = pygame.transform.rotate(pygame.image.load('img/antigravity.png'), 180)
+antigravity_button_img = pygame.image.load('img/antigravity.png')
 normal_button_img = pygame.image.load('img/normal.png')
 easy_button_img = pygame.image.load('img/easy.png')
 hard_button_img = pygame.image.load('img/hard.png')
+
+difficulty_img = pygame.image.load('img/difficulty.png')
+difficulty1_img = pygame.image.load('img/difficulty1.PNG')
+difficulty2_img = pygame.image.load('img/difficulty2.PNG')
+difficulty3_img = pygame.image.load('img/difficulty3.PNG')
+difficulty4_img = pygame.image.load('img/difficulty4.PNG')
+
 zero_img = pygame.image.load('img/0.png')
 one_img = pygame.image.load('img/1.png')
 two_img = pygame.image.load('img/2.png')
@@ -193,7 +200,16 @@ def reset(mode_change=False):
     if mode_change is True:
         high_score = 0
 
-
+def change_difficulty(difficulty):
+    global time_since_last_pipe
+    if difficulty == 1:
+        time_since_last_pipe = 1500
+    if difficulty == 2:
+        time_since_last_pipe = 1250
+    if difficulty == 3:
+        time_since_last_pipe = 1000
+    if difficulty == 4:
+        time_since_last_pipe = 750
 
 
 
@@ -209,10 +225,15 @@ bird_group.add(flappy)
 # Create Button Objects from Button Class
 restart_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT, restart_button_img)
 antigravity_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, antigravity_button_img)
+
 normal_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, normal_button_img)
 hard_button = Button(800, 820, hard_button_img)
 easy_button = Button(700, 820, easy_button_img)
 
+difficulty1_button = Button(MIDDLE_WIDTH - 75, MIDDLE_HEIGHT + 200, difficulty1_img)
+difficulty2_button = Button(MIDDLE_WIDTH - 25, MIDDLE_HEIGHT + 200, difficulty2_img)
+difficulty3_button = Button(MIDDLE_WIDTH + 25, MIDDLE_HEIGHT + 200, difficulty3_img)
+difficulty4_button = Button(MIDDLE_WIDTH + 75, MIDDLE_HEIGHT + 200, difficulty4_img)
 
 
 if __name__ == '__main__':
@@ -276,6 +297,7 @@ if __name__ == '__main__':
 
         if game_over:
             window.blit(game_over_img, (200, 200))
+            window.blit(difficulty_img, (MIDDLE_WIDTH - 80, 580))
             if restart_button.draw() is True:
                 reset()
 
@@ -289,17 +311,18 @@ if __name__ == '__main__':
                     flappy.antigravity = False
                     reset(mode_change=True)
 
-            if time_since_last_pipe > 750:
-                if hard_button.draw() is True:
-                    high_score = 0
-                    time_since_last_pipe -= 250
-                    reset(mode_change=True)
-
-            if time_since_last_pipe <= 1500:
-                if easy_button.draw() is True:
-                    high_score = 0
-                    time_since_last_pipe += 250
-                    reset(mode_change=True)
+            if difficulty1_button.draw() is True:
+                change_difficulty(1)
+                reset(mode_change=True)
+            if difficulty2_button.draw() is True:
+                change_difficulty(2)
+                reset(mode_change=True)
+            if difficulty3_button.draw() is True:
+                change_difficulty(3)
+                reset(mode_change=True)
+            if difficulty4_button.draw() is True:
+                change_difficulty(4)
+                reset(mode_change=True)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
