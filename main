@@ -5,7 +5,6 @@ import random
 
 pygame.init()
 
-
 clock = pygame.time.Clock()
 # Create Window Variables
 WINDOW_WIDTH = 864
@@ -27,6 +26,7 @@ pipe_gap = 200
 time_since_last_pipe = 1500
 last_pipe = pygame.time.get_ticks() - time_since_last_pipe
 score = 0
+high_score = 0
 pass_pipe = False
 WHITE = (255, 255, 255)
 font = pygame.font.SysFont('arial', 60)
@@ -36,9 +36,9 @@ background = pygame.image.load('img/bg.png')
 ground = pygame.image.load('img/ground.png')
 
 
-def draw_score(score, font):
+def draw_score(score, font, x, y):
     img = font.render(score, True, WHITE)
-    window.blit(img, (MIDDLE_WIDTH, 50))
+    window.blit(img, (x, y))
 
 def draw_background(window, background):
     window.blit(background, (0, 0))
@@ -126,6 +126,8 @@ if __name__ == '__main__':
                 if flappy.rect.left > pipe_group.sprites()[0].rect.right:
                     score += 1
                     pass_pipe = False
+                    if score > high_score:
+                        high_score = score
 
 
 
@@ -170,7 +172,8 @@ if __name__ == '__main__':
                     if is_flying and game_over is False:
                         flappy.jump()
 
-        draw_score(str(score), font)
+        draw_score(str(score), font, MIDDLE_WIDTH, 10)
+        draw_score(f'High Score: {str(high_score)}', font, 10, 10)
 
         pygame.display.update()
     pygame.quit()
