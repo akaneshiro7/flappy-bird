@@ -31,17 +31,31 @@ score = 0
 high_score = 0
 pass_pipe = False
 WHITE = (255, 255, 255)
-font = pygame.font.SysFont('arial', 60)
+font = pygame.font.SysFont('Segoe UI', 40)
 sound_played = False
 
 # Load Images
 background = pygame.image.load('img/bg.png')
 ground = pygame.image.load('img/ground.png')
 restart_button_img = pygame.image.load('img/restart.png')
+game_over_img = pygame.image.load('img/gameover.png')
 antigravity_button_img = pygame.transform.rotate(pygame.image.load('img/antigravity.png'), 180)
 normal_button_img = pygame.image.load('img/normal.png')
 easy_button_img = pygame.image.load('img/easy.png')
 hard_button_img = pygame.image.load('img/hard.png')
+zero_img = pygame.image.load('img/0.png')
+one_img = pygame.image.load('img/1.png')
+two_img = pygame.image.load('img/2.png')
+three_img = pygame.image.load('img/3.png')
+four_img = pygame.image.load('img/4.png')
+five_img = pygame.image.load('img/5.png')
+six_img = pygame.image.load('img/6.png')
+seven_img = pygame.image.load('img/7.png')
+eight_img = pygame.image.load('img/8.png')
+nine_img = pygame.image.load('img/9.png')
+
+
+
 
 # load sounds
 die_sound = pygame.mixer.Sound('img/die.wav')
@@ -51,10 +65,33 @@ swoosh_sound = pygame.mixer.Sound('img/swoosh.wav')
 wing_sound = pygame.mixer.Sound('img/wing.wav')
 
 
-def draw_score(score, font, x, y):
-    img = font.render(score, True, WHITE)
+def draw_text(text, font, x, y):
+    img = font.render(text, True, WHITE)
     window.blit(img, (x, y))
 
+def draw_score(score, x, y):
+    s = str(score)
+    for i in range(len(s)):
+        if s[i] == '0':
+            window.blit(zero_img, (x + i * 25, y))
+        if s[i] == '1':
+            window.blit(one_img, (x+ i * 25, y))
+        if s[i] == '2':
+            window.blit(two_img, (x+ i * 25, y))
+        if s[i] == '3':
+            window.blit(three_img, (x+ i * 25, y))
+        if s[i] == '4':
+            window.blit(four_img, (x+ i * 25, y))
+        if s[i] == '5':
+            window.blit(five_img, (x+ i * 25, y))
+        if s[i] == '6':
+            window.blit(six_img, (x+ i * 25, y))
+        if s[i] == '7':
+            window.blit(seven_img, (x+ i * 25, y))
+        if s[i] == '8':
+            window.blit(eight_img, (x+ i * 25, y))
+        if s[i] == '9':
+            window.blit(nine_img, (x+ i * 25, y))
 
 def draw_background(window, background):
     window.blit(background, (0, 0))
@@ -142,16 +179,20 @@ class Button:
         return button_clicked
 
 # Define when a game is reset
-def reset():
+def reset(mode_change=False):
     global score
     global game_over
     global sound_played
+    global high_score
     pipe_group.empty()
     flappy.rect.x, flappy.rect.y = 100, 500
     flappy.image = pygame.image.load('img/bird1.png')
     score = 0
     game_over = False
     sound_played = False
+    if mode_change is True:
+        high_score = 0
+
 
 
 
@@ -167,8 +208,8 @@ bird_group.add(flappy)
 
 # Create Button Objects from Button Class
 restart_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT, restart_button_img)
-antigravity_button = Button(75, 820, antigravity_button_img)
-normal_button = Button(75, 820, normal_button_img)
+antigravity_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, antigravity_button_img)
+normal_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, normal_button_img)
 hard_button = Button(800, 820, hard_button_img)
 easy_button = Button(700, 820, easy_button_img)
 
@@ -234,35 +275,31 @@ if __name__ == '__main__':
                 sound_played = True
 
         if game_over:
+            window.blit(game_over_img, (200, 200))
             if restart_button.draw() is True:
                 reset()
 
-
-
-        if is_flying is False and game_over is True:
             if flappy.antigravity is False:
                 if antigravity_button.draw() is True:
                     flappy.antigravity = True
-                    reset()
-                    high_score = 0
+                    reset(mode_change=True)
 
             elif flappy.antigravity is True:
                 if normal_button.draw() is True:
                     flappy.antigravity = False
-                    reset()
-                    high_score = 0
+                    reset(mode_change=True)
 
             if time_since_last_pipe > 750:
                 if hard_button.draw() is True:
                     high_score = 0
                     time_since_last_pipe -= 250
-                    reset()
+                    reset(mode_change=True)
 
             if time_since_last_pipe <= 1500:
                 if easy_button.draw() is True:
                     high_score = 0
                     time_since_last_pipe += 250
-                    reset()
+                    reset(mode_change=True)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -276,9 +313,11 @@ if __name__ == '__main__':
                     if is_flying and game_over is False:
                         flappy.jump()
 
-        draw_score(f'Current Score: {str(score)}', font, 455, 10)
-        draw_score(f'High Score: {str(high_score)}', font, 10, 10)
+
+        draw_text('High Score:', font, 20, 10)
+        draw_score(high_score, 220, 25)
+        draw_text('Current Score:', font, 500, 10)
+        draw_score(score, 750, 25)
 
         pygame.display.update()
     pygame.quit()
-
