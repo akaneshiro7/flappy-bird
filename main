@@ -143,9 +143,16 @@ class Button:
 
 # Define when a game is reset
 def reset():
+    global score
+    global game_over
+    global sound_played
     pipe_group.empty()
     flappy.rect.x, flappy.rect.y = 100, 500
     flappy.image = pygame.image.load('img/bird1.png')
+    score = 0
+    game_over = False
+    sound_played = False
+
 
 
 
@@ -229,9 +236,7 @@ if __name__ == '__main__':
         if game_over:
             if restart_button.draw() is True:
                 reset()
-                game_over = False
-                score = 0
-                sound_played = False
+
 
 
         if is_flying is False and game_over is True:
@@ -239,37 +244,25 @@ if __name__ == '__main__':
                 if antigravity_button.draw() is True:
                     flappy.antigravity = True
                     reset()
-                    game_over = False
-                    score = 0
                     high_score = 0
-                    sound_played = False
 
             elif flappy.antigravity is True:
                 if normal_button.draw() is True:
                     flappy.antigravity = False
                     reset()
-                    game_over = False
-                    score = 0
                     high_score = 0
-                    sound_played = False
 
             if time_since_last_pipe > 750:
                 if hard_button.draw() is True:
-                    score = 0
                     high_score = 0
-                    game_over = False
                     time_since_last_pipe -= 250
                     reset()
-                    sound_played = False
 
             if time_since_last_pipe <= 1500:
                 if easy_button.draw() is True:
-                    score = 0
                     high_score = 0
-                    game_over = False
                     time_since_last_pipe += 250
                     reset()
-                    sound_played = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -288,3 +281,4 @@ if __name__ == '__main__':
 
         pygame.display.update()
     pygame.quit()
+
