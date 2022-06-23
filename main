@@ -2,10 +2,10 @@ import pygame
 from pygame.locals import *
 import random
 
-
 pygame.init()
 
 clock = pygame.time.Clock()
+
 # Create Window Variables
 WINDOW_WIDTH = 864
 WINDOW_HEIGHT = 936
@@ -29,7 +29,7 @@ pipe_variety = 100
 last_pipe = pygame.time.get_ticks() - time_since_last_pipe
 score = 0
 high_score = 0
-pass_pipe = False
+in_pipe = False
 WHITE = (255, 255, 255)
 font = pygame.font.SysFont('Segoe UI', 40)
 sound_played = False
@@ -44,12 +44,14 @@ normal_button_img = pygame.image.load('img/normal.png')
 easy_button_img = pygame.image.load('img/easy.png')
 hard_button_img = pygame.image.load('img/hard.png')
 
+# load difficulty pictures
 difficulty_img = pygame.image.load('img/difficulty.png')
 difficulty1_img = pygame.image.load('img/difficulty1.PNG')
 difficulty2_img = pygame.image.load('img/difficulty2.PNG')
 difficulty3_img = pygame.image.load('img/difficulty3.PNG')
 difficulty4_img = pygame.image.load('img/difficulty4.PNG')
 
+# load images
 zero_img = pygame.image.load('img/0.png')
 one_img = pygame.image.load('img/1.png')
 two_img = pygame.image.load('img/2.png')
@@ -62,8 +64,6 @@ eight_img = pygame.image.load('img/8.png')
 nine_img = pygame.image.load('img/9.png')
 
 
-
-
 # load sounds
 die_sound = pygame.mixer.Sound('img/die.wav')
 hit_sound = pygame.mixer.Sound('img/hit.wav')
@@ -72,135 +72,268 @@ swoosh_sound = pygame.mixer.Sound('img/swoosh.wav')
 wing_sound = pygame.mixer.Sound('img/wing.wav')
 
 
+# create images from text and draw on screen
 def draw_text(text, font, x, y):
+    """
+    Renders Image from Text and draws it at x and y coordinate
+    :param text: string, text to draw on screen
+    :param font: string, font loaded from pygame.SysFont
+    :param x: int, x coordinate
+    :param y: int, y coordinate
+    :return: None
+    """
     img = font.render(text, True, WHITE)
     window.blit(img, (x, y))
 
+
+# draw the score using the images
 def draw_score(score, x, y):
+    """
+    Finds score and draws it at x and y
+    :param score: int, game score
+    :param x: x coordinate to draw first digit
+    :param y: y coordinate to draw first digit
+    :return: None
+    """
     s = str(score)
+    # draws at i * 25 to prevent number overlap if there are multiple digits
     for i in range(len(s)):
         if s[i] == '0':
-            window.blit(zero_img, (x + i * 25, y))
+            window.blit(zero_img, (x + i*25, y))
         if s[i] == '1':
-            window.blit(one_img, (x+ i * 25, y))
+            window.blit(one_img, (x + i*25, y))
         if s[i] == '2':
-            window.blit(two_img, (x+ i * 25, y))
+            window.blit(two_img, (x + i*25, y))
         if s[i] == '3':
-            window.blit(three_img, (x+ i * 25, y))
+            window.blit(three_img, (x + i*25, y))
         if s[i] == '4':
-            window.blit(four_img, (x+ i * 25, y))
+            window.blit(four_img, (x + i*25, y))
         if s[i] == '5':
-            window.blit(five_img, (x+ i * 25, y))
+            window.blit(five_img, (x + i*25, y))
         if s[i] == '6':
-            window.blit(six_img, (x+ i * 25, y))
+            window.blit(six_img, (x + i*25, y))
         if s[i] == '7':
-            window.blit(seven_img, (x+ i * 25, y))
+            window.blit(seven_img, (x + i*25, y))
         if s[i] == '8':
-            window.blit(eight_img, (x+ i * 25, y))
+            window.blit(eight_img, (x + i*25, y))
         if s[i] == '9':
-            window.blit(nine_img, (x+ i * 25, y))
+            window.blit(nine_img, (x + i*25, y))
 
+
+# draw the background
 def draw_background(window, background):
+    """
+    Draws the background
+    :param window: pygame window to draw the background on
+    :param background: background image
+    :return: None
+    """
     window.blit(background, (0, 0))
 
 
+# draw the ground
 def draw_ground(window, ground):
+    """
+    Draws background
+    :param window: pygame window to draw ground on
+    :param ground: ground image
+    :return:
+    """
     window.blit(ground, (ground_coordinate, 768))
 
 
+# Create bird class
 class Bird(pygame.sprite.Sprite):
     def __init__(self, x, y, antigravity=False):
+        """
+        Initialize Bird Attributes
+        :param x: int, x coordinate of bird
+        :param y: int, y coordinate of bird
+        :param antigravity: boolean, whether antigravity mode is one
+        """
+        # Create Bird from Pygame Sprite Class
         pygame.sprite.Sprite.__init__(self)
+        # Load Image of Bird
         self.image = pygame.image.load('img/bird1.png')
-
+        # Create Rectangle from Image
         self.rect = self.image.get_rect()
+        # Place Bird center at coordinates
         self.rect.center = [x, y]
+        # Initalize the gravity
         self.vel = 0
+        # Initialize Antigravity mode
         self.antigravity = antigravity
 
     def update(self):
+        """
+        Updates Bird's y coordinate
+        :return: None
+        """
+        # If the bird is flying:
         if is_flying:
-            # gravity
+            # Create Constant Gravity
             self.vel += 0.5
+            # Create Terminal Velocity
             if self.vel > 10:
                 self.vel = 10
+            # If antigravity is off, gravity goes down
             if self.antigravity is False:
                 self.rect.y += int(self.vel)
+            # If antigravity is on, gravity goes up
             elif self.antigravity is True:
                 self.rect.y -= int(self.vel)
-
+            # If the bird hits the ground, the bird stays on the ground
             if self.rect.bottom == 768:
                 self.rect.bottom = 768
 
+        # If the game is over and the bird is not on the ground
         if game_over is True and self.rect.bottom <= 768:
+            # Make the bird fall fast and spin
             self.vel = 20
             self.image = pygame.transform.rotate(self.image, -90)
+
+            # If antigravity is off, bird will fall down
             if self.antigravity is False:
                 self.rect.y += self.vel
+            # if antigravity is on, bird will fall up
             elif self.antigravity is True:
                 self.rect.y -= self.vel
 
     def jump(self):
+        """
+        Allow the bird to jump
+        :return: None
+        """
+        # Give bird movement in y direction
         self.vel = -8
+        # play wing sound
         wing_sound.play()
 
+
+# Create Pipe Class
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, x, y, position):
+        """
+        Initialize pipe Class
+        :param x: int, x coordinate of pipe
+        :param y: int, y coordinate of pipe
+        :param position: 'top' or 'bottom', pipe orientation
+        """
+        # Initialize Pipe from Pygame Sprite Class
         pygame.sprite.Sprite.__init__(self)
+        # Draw pipe
         self.image = pygame.image.load('img/pipe.png')
+        # Draw rectangle from pipe image
         self.rect = self.image.get_rect()
+        # If the pipe is a top pipe,
         if position == 'top':
+            # flip image
             self.image = pygame.transform.flip(self.image, False, True)
+            # draw image at coordinates
             self.rect.bottomleft = [x, y - pipe_gap]
+        # If pipe is a top pipe
         if position == 'bottom':
+            # draw image at coordinates
             self.rect.topleft = [x, y + pipe_gap]
 
+
     def update(self):
+        """
+        Update Pipe Position
+        :return:
+        """
+        # Move pipe at same speed of ground
         self.rect.x -= scroll
+        # If pipe is off screen, delete pipe
         if self.rect.right < 0:
             self.kill()
 
 
 def create_pipe():
+    """
+    Create pipes
+    :return: None
+    """
+    # get random pipe height
     pipe_height = random.randint(-pipe_variety, pipe_variety)
-    bottom_pipe = Pipe(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + pipe_height, 'bottom')
-    top_pipe = Pipe(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + pipe_height, 'top')
+    # Create one top and one bottom pipe
+    bottom_pipe = Pipe(WINDOW_WIDTH, MIDDLE_HEIGHT + pipe_height, 'bottom')
+    top_pipe = Pipe(WINDOW_WIDTH, MIDDLE_HEIGHT+ pipe_height, 'top')
+    # add pipes to pipe group
     pipe_group.add(bottom_pipe)
     pipe_group.add(top_pipe)
 
 
+# Create Button Class
 class Button:
     def __init__(self, x, y, image):
+        """
+        Initialize Pipe Attributes
+        :param x: int, button x position
+        :param y: int, button y coordinate
+        :param image: pygame image
+        """
+        # Set image
         self.image = image
+        # Get rectangle from image
         self.rect = self.image.get_rect()
+        # Set center of rectangle to coordinates
         self.rect.center = (x, y)
 
     def draw(self):
+        """
+        Draw the Button and check if clicked
+        :return: Boolean, True if button is clicked, False if not clicked
+        """
+        # Initially set the button to not clicked
         button_clicked = False
-        mouse_position = pygame.mouse.get_pos()
-        if self.rect.collidepoint(mouse_position):
-            if pygame.mouse.get_pressed()[0] == 1:
-                button_clicked = True
-
         window.blit(self.image, (self.rect.x, self.rect.y))
+        # Get position of the mouse
+        mouse_position = pygame.mouse.get_pos()
+        # If mouse is over button
+        if self.rect.collidepoint(mouse_position):
+            # if mouse is clicked
+            if pygame.mouse.get_pressed()[0] == 1:
+                # THe button was clicked
+                button_clicked = True
+        # return whether button was clicked
         return button_clicked
+
 
 # Define when a game is reset
 def reset(mode_change=False):
+    """
+    Reset game variables
+    :param mode_change: Boolean, True if game mode is changed, False if not
+    :return: None
+    """
     global score
     global game_over
     global sound_played
     global high_score
+    # Delete all pipes
     pipe_group.empty()
+    # Reset bird to original position
     flappy.rect.x, flappy.rect.y = 100, 500
+    # Reset bird to original position
     flappy.image = pygame.image.load('img/bird1.png')
+    # Reset Score
     score = 0
+    # Reset the gameover variable to false
     game_over = False
+    # Reset the death sound played variable to false
     sound_played = False
+    # If the difficulty or game mode is changed, set score to 0
     if mode_change is True:
         high_score = 0
 
+
 def change_difficulty(difficulty):
+    """
+    Change the difficulty of the game by changing distance between pipes
+    :param difficulty:
+    :return: None
+    """
     global time_since_last_pipe
     if difficulty == 1:
         time_since_last_pipe = 1500
@@ -212,50 +345,72 @@ def change_difficulty(difficulty):
         time_since_last_pipe = 750
 
 
-
 # Create pipe and bird groups
 bird_group = pygame.sprite.Group()
 pipe_group = pygame.sprite.Group()
 
 # Create Instance of Bird Object
 flappy = Bird(100, MIDDLE_WIDTH)
-
+# add bird instance to group
 bird_group.add(flappy)
 
 # Create Button Objects from Button Class
+# Restart Button
 restart_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT, restart_button_img)
+# Mode change buttons
 antigravity_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, antigravity_button_img)
-
 normal_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, normal_button_img)
-hard_button = Button(800, 820, hard_button_img)
-easy_button = Button(700, 820, easy_button_img)
 
+# Difficulty Buttons
 difficulty1_button = Button(MIDDLE_WIDTH - 75, MIDDLE_HEIGHT + 200, difficulty1_img)
 difficulty2_button = Button(MIDDLE_WIDTH - 25, MIDDLE_HEIGHT + 200, difficulty2_img)
 difficulty3_button = Button(MIDDLE_WIDTH + 25, MIDDLE_HEIGHT + 200, difficulty3_img)
 difficulty4_button = Button(MIDDLE_WIDTH + 75, MIDDLE_HEIGHT + 200, difficulty4_img)
 
 
+def check_score():
+    """
+    Check to see if the score was changed
+    :return: None
+    """
+    global in_pipe
+    global high_score
+    global score
+    # If there is at least one pipe
+    if len(pipe_group) > 0:
+        # If left of bird is passed leftmost of left pipe
+        # and right of bird is not passed right of pipe
+        # and the bird is not yet in pipe
+        if flappy.rect.left > pipe_group.sprites()[0].rect.left \
+                and flappy.rect.right < pipe_group.sprites()[0].rect.right \
+                and in_pipe is False:
+            # Set that the bird is in the pip
+            in_pipe = True
+        # If the bird is in the pipe
+        # If the left of the bird passes the right of the pipe
+        if in_pipe is True:
+            if flappy.rect.left > pipe_group.sprites()[0].rect.right:
+                # Add to score
+                score += 1
+                # Set bird to no longer in pipe
+                in_pipe = False
+                # Check if current score is greater than high score
+                high_score = max(score, high_score)
+                # play point sound
+                point_sound.play()
+
+
+# Main loop
 if __name__ == '__main__':
+    # Create infinite loop
     run = True
     while run is True:
-
-        clock.tick(60)
-
+        # Set Frames Per Second
+        clock.tick(FPS)
+        # Draw Main Code
         pipe_group.draw(window)
 
-        if len(pipe_group) > 0:
-            if flappy.rect.left > pipe_group.sprites()[0].rect.left\
-                and flappy.rect.right < pipe_group.sprites()[0].rect.right\
-                and pass_pipe is False:
-                pass_pipe = True
-
-            if pass_pipe is True:
-                if flappy.rect.left > pipe_group.sprites()[0].rect.right:
-                    score += 1
-                    pass_pipe = False
-                    high_score = max(score, high_score)
-                    point_sound.play()
+        check_score()
 
         # draw background
         draw_background(window, background)
@@ -266,50 +421,83 @@ if __name__ == '__main__':
 
         # animate ground
         draw_ground(window, ground)
+        # if the bird is flying
         if is_flying:
+            # move the ground
             ground_coordinate -= scroll
+            # reset ground to original position
             if ground_coordinate == -36:
                 ground_coordinate = 0
-
+            # get current time
             current_time = pygame.time.get_ticks()
-            if current_time - last_pipe > time_since_last_pipe:
+            # if enough time passed to create a pipe
+            if current_time > time_since_last_pipe + last_pipe:
+                # Create a pipe
                 create_pipe()
+                # Reset time of last pipe
                 last_pipe = current_time
-
+            # update the pipe group
             pipe_group.update()
-
+        # if the bird hits the pipe or the bird hits the top
         if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
+            # the game is over
             game_over = True
+            # the bird can't fly
             is_flying = False
+            # if the death sound hasn't played
             if sound_played is False:
+                # play death sounds
                 hit_sound.play()
                 die_sound.play()
+                # change the sound played to true
                 sound_played = True
 
-
-        # check if bird is on ground
+        # if bird is on ground
         if flappy.rect.bottom >= 768:
+            # the game is over
             game_over = True
+            # the bird can no longer fly
             is_flying = False
+            # if a death sound hasn't played
             if sound_played is False:
+                # play the death sound
                 die_sound.play()
+                # change the sound played to true
                 sound_played = True
-
+        # if the game is over
         if game_over:
+            # draw the game over image
             window.blit(game_over_img, (200, 200))
+            # draw the difficulty image
             window.blit(difficulty_img, (MIDDLE_WIDTH - 80, 580))
-            if restart_button.draw() is True:
-                reset()
 
+            # draw reset button
+            if restart_button.draw() is True:
+                # if button is clicked reset
+                reset()
+            # if the antigravity is off
             if flappy.antigravity is False:
+                # draw antigravity button
                 if antigravity_button.draw() is True:
+                    # if the antigravity button is clicked,
+                    # reset to antigravity mode
                     flappy.antigravity = True
                     reset(mode_change=True)
-
+            # if antigravity is on
             elif flappy.antigravity is True:
+                # draw normal mode
                 if normal_button.draw() is True:
+                    # if normal modes is clicked,
+                    # reset to normal mode
                     flappy.antigravity = False
                     reset(mode_change=True)
+            # draw difficulty buttons
+            # if difficulty is changed,
+            # reset to that difficulty mode
+
+            # draw difficulty buttons
+            # if difficulty button is clicked,
+            # change difficulty
 
             if difficulty1_button.draw() is True:
                 change_difficulty(1)
@@ -324,23 +512,38 @@ if __name__ == '__main__':
                 change_difficulty(4)
                 reset(mode_change=True)
 
+        # Get user inputs
         for event in pygame.event.get():
+            # If user clicks x on window
             if event.type == pygame.QUIT:
+                # turn game off
                 run = False
+            # if user presses key
             if event.type == pygame.KEYDOWN:
+                # if user presses escape key
                 if event.key == K_ESCAPE:
+                    # turn game off
                     run = False
+                # if user presses space
                 if event.key == K_SPACE:
+                    # if the bird is not flying and game is not over
+                    # Basically if the bird has reset but game has not started
                     if is_flying is False and game_over is False:
+                        # Allow the game to begin
                         is_flying = True
+                    # if the game is running
                     if is_flying and game_over is False:
+                        # allow the bird to jump
                         flappy.jump()
 
-
+        # draw the scores
         draw_text('High Score:', font, 20, 10)
         draw_score(high_score, 220, 25)
         draw_text('Current Score:', font, 500, 10)
         draw_score(score, 750, 25)
 
+        # Update the display
         pygame.display.update()
+    # if the game is over,
+    # delete the screen
     pygame.quit()
