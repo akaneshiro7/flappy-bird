@@ -301,10 +301,10 @@ class Button:
 
 
 # Define when a game is reset
-def reset(mode_change=False, image=bird_img):
+def reset(image=bird_img):
     """
     Reset game variables
-    :param mode_change: Boolean, True if game mode is changed, False if not
+    :param pygame image, which image to redraw flappy as
     :return: None
     """
     global score
@@ -324,8 +324,7 @@ def reset(mode_change=False, image=bird_img):
     # Reset the death sound played variable to false
     sound_played = False
     # If the difficulty or game mode is changed, set score to 0
-    if mode_change is True:
-        high_score = 0
+
 
 
 def change_difficulty(difficulty):
@@ -498,7 +497,7 @@ if __name__ == '__main__':
                     # if the antigravity button is clicked,
                     # reset to antigravity mode
                     flappy.antigravity = True
-                    reset(mode_change=True)
+                    reset()
             # if antigravity is on
             elif flappy.antigravity is True:
                 # draw normal mode
@@ -506,7 +505,7 @@ if __name__ == '__main__':
                     # if normal modes is clicked,
                     # reset to normal mode
                     flappy.antigravity = False
-                    reset(mode_change=True)
+                    reset()
             # draw difficulty buttons
             # if difficulty is changed,
             # reset to that difficulty mode
@@ -517,16 +516,16 @@ if __name__ == '__main__':
 
             if difficulty1_button.draw() is True:
                 change_difficulty(1)
-                reset(mode_change=True)
+                reset()
             if difficulty2_button.draw() is True:
                 change_difficulty(2)
-                reset(mode_change=True)
+                reset()
             if difficulty3_button.draw() is True:
                 change_difficulty(3)
-                reset(mode_change=True)
+                reset()
             if difficulty4_button.draw() is True:
                 change_difficulty(4)
-                reset(mode_change=True)
+                reset()
             if emma_button.draw() is True:
                 reset(image=emma_img)
 
@@ -570,3 +569,4 @@ if __name__ == '__main__':
     # if the game is over,
     # delete the screen
     pygame.quit()
+
