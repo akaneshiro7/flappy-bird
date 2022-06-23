@@ -41,8 +41,7 @@ restart_button_img = pygame.image.load('img/restart.png')
 game_over_img = pygame.image.load('img/gameover.png')
 antigravity_button_img = pygame.image.load('img/antigravity.png')
 normal_button_img = pygame.image.load('img/normal.png')
-easy_button_img = pygame.image.load('img/easy.png')
-hard_button_img = pygame.image.load('img/hard.png')
+emma_img = pygame.image.load('img/emma.png')
 
 # load difficulty pictures
 difficulty_img = pygame.image.load('img/difficulty.png')
@@ -367,7 +366,7 @@ difficulty2_button = Button(MIDDLE_WIDTH - 25, MIDDLE_HEIGHT + 200, difficulty2_
 difficulty3_button = Button(MIDDLE_WIDTH + 25, MIDDLE_HEIGHT + 200, difficulty3_img)
 difficulty4_button = Button(MIDDLE_WIDTH + 75, MIDDLE_HEIGHT + 200, difficulty4_img)
 
-
+emma_button = Button(50, 850 , pygame.image.load(emma_img))
 def check_score():
     """
     Check to see if the score was changed
@@ -511,6 +510,9 @@ if __name__ == '__main__':
             if difficulty4_button.draw() is True:
                 change_difficulty(4)
                 reset(mode_change=True)
+            if emma_button.draw() is True:
+                reset()
+                flappy.image = emma_img
 
         # Get user inputs
         for event in pygame.event.get():
