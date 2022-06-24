@@ -238,10 +238,6 @@ def reset(image=bird_img):
     :param image: pygame image, which image to redraw flappy as
     :return: None
     """
-    global score
-    global game_over
-    global sound_played
-    global high_score
     # Delete all pipes
     pipe_group.empty()
     # Reset bird to original position
@@ -255,6 +251,7 @@ def reset(image=bird_img):
     # Reset the death sound played variable to false
     sound_played = False
     # If the difficulty or game mode is changed, set score to 0
+    return score, game_over, sound_played, high_score
 
 
 # Create pipe and bird groups
@@ -379,6 +376,7 @@ if __name__ == '__main__':
                 die_sound.play()
                 # change the sound played to true
                 sound_played = True
+
         # if the game is over
         if game_over:
             # draw the game over image
@@ -389,7 +387,7 @@ if __name__ == '__main__':
             # draw reset button
             if restart_button.draw() is True:
                 # if button is clicked reset
-                reset()
+                score, game_over, sound_played, high_score = reset()
             # if the antigravity is off
             if flappy.antigravity is False:
                 # draw antigravity button
@@ -397,7 +395,7 @@ if __name__ == '__main__':
                     # if the antigravity button is clicked,
                     # reset to antigravity mode
                     flappy.antigravity = True
-                    reset()
+                    score, game_over, sound_played, high_score = reset()
             # if antigravity is on
             elif flappy.antigravity is True:
                 # draw normal mode
@@ -405,7 +403,7 @@ if __name__ == '__main__':
                     # if normal modes is clicked,
                     # reset to normal mode
                     flappy.antigravity = False
-                    reset()
+                    score, game_over, sound_played, high_score = reset()
             # draw difficulty buttons
             # if difficulty is changed,
             # reset to that difficulty mode
@@ -416,18 +414,18 @@ if __name__ == '__main__':
 
             if difficulty1_button.draw() is True:
                 time_between_pipe = change_difficulty(1)
-                reset()
+                score, game_over, sound_played, high_score = reset()
             if difficulty2_button.draw() is True:
                 time_between_pipe = change_difficulty(2)
-                reset()
+                score, game_over, sound_played, high_score = reset()
             if difficulty3_button.draw() is True:
                 time_between_pipe = change_difficulty(3)
-                reset()
+                score, game_over, sound_played, high_score = reset()
             if difficulty4_button.draw() is True:
                 time_between_pipe = change_difficulty(4)
-                reset()
+                score, game_over, sound_played, high_score = reset()
             if emma_button.draw() is True:
-                reset(image=emma_img)
+                score, game_over, sound_played, high_score = reset(image=emma_img)
 
         # Get user inputs
         for event in pygame.event.get():
