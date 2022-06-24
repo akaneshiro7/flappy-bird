@@ -1,6 +1,15 @@
+import random
+
 import pygame
 from pygame.locals import *
-import random
+
+from draw import draw_mode
+from draw import draw_text
+from draw import draw_score
+from draw import draw_background
+from draw import draw_ground
+from draw import draw_difficulty
+from change_difficulty import change_difficulty
 
 pygame.init()
 
@@ -46,100 +55,23 @@ emma_img = pygame.image.load('img/emma.png')
 
 # load difficulty pictures
 difficulty_img = pygame.image.load('img/difficulty.png')
-difficulty1_img = pygame.image.load('img/difficulty1.PNG')
-difficulty2_img = pygame.image.load('img/difficulty2.PNG')
-difficulty3_img = pygame.image.load('img/difficulty3.PNG')
-difficulty4_img = pygame.image.load('img/difficulty4.PNG')
+difficulty_images = []
+for i in range(1, 5):
+    img = pygame.image.load(f'img/difficulty{i}.PNG')
+    difficulty_images.append(img)
+
 
 # load images
-zero_img = pygame.image.load('img/0.png')
-one_img = pygame.image.load('img/1.png')
-two_img = pygame.image.load('img/2.png')
-three_img = pygame.image.load('img/3.png')
-four_img = pygame.image.load('img/4.png')
-five_img = pygame.image.load('img/5.png')
-six_img = pygame.image.load('img/6.png')
-seven_img = pygame.image.load('img/7.png')
-eight_img = pygame.image.load('img/8.png')
-nine_img = pygame.image.load('img/9.png')
-
+num_images = []
+for i in range(10):
+    img = pygame.image.load(f'img/{i}.png')
+    num_images.append(img)
 
 # load sounds
 die_sound = pygame.mixer.Sound('img/die.wav')
 hit_sound = pygame.mixer.Sound('img/hit.wav')
 point_sound = pygame.mixer.Sound('img/point.wav')
-swoosh_sound = pygame.mixer.Sound('img/swoosh.wav')
 wing_sound = pygame.mixer.Sound('img/wing.wav')
-
-
-# create images from text and draw on screen
-def draw_text(text, font, x, y):
-    """
-    Renders Image from Text and draws it at x and y coordinate
-    :param text: string, text to draw on screen
-    :param font: string, font loaded from pygame.SysFont
-    :param x: int, x coordinate
-    :param y: int, y coordinate
-    :return: None
-    """
-    img = font.render(text, True, WHITE)
-    window.blit(img, (x, y))
-
-
-# draw the score using the images
-def draw_score(score, x, y):
-    """
-    Finds score and draws it at x and y
-    :param score: int, game score
-    :param x: x coordinate to draw first digit
-    :param y: y coordinate to draw first digit
-    :return: None
-    """
-    s = str(score)
-    # draws at i * 25 to prevent number overlap if there are multiple digits
-    for i in range(len(s)):
-        if s[i] == '0':
-            window.blit(zero_img, (x + i*25, y))
-        if s[i] == '1':
-            window.blit(one_img, (x + i*25, y))
-        if s[i] == '2':
-            window.blit(two_img, (x + i*25, y))
-        if s[i] == '3':
-            window.blit(three_img, (x + i*25, y))
-        if s[i] == '4':
-            window.blit(four_img, (x + i*25, y))
-        if s[i] == '5':
-            window.blit(five_img, (x + i*25, y))
-        if s[i] == '6':
-            window.blit(six_img, (x + i*25, y))
-        if s[i] == '7':
-            window.blit(seven_img, (x + i*25, y))
-        if s[i] == '8':
-            window.blit(eight_img, (x + i*25, y))
-        if s[i] == '9':
-            window.blit(nine_img, (x + i*25, y))
-
-
-# draw the background
-def draw_background(window, background):
-    """
-    Draws the background
-    :param window: pygame window to draw the background on
-    :param background: background image
-    :return: None
-    """
-    window.blit(background, (0, 0))
-
-
-# draw the ground
-def draw_ground(window, ground):
-    """
-    Draws background
-    :param window: pygame window to draw ground on
-    :param ground: ground image
-    :return:
-    """
-    window.blit(ground, (ground_coordinate, 768))
 
 
 # Create bird class
@@ -159,7 +91,7 @@ class Bird(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # Place Bird center at coordinates
         self.rect.center = [x, y]
-        # Initalize the gravity
+        # Initialize the gravity
         self.vel = 0
         # Initialize Antigravity mode
         self.antigravity = antigravity
@@ -236,7 +168,6 @@ class Pipe(pygame.sprite.Sprite):
             # draw image at coordinates
             self.rect.topleft = [x, y + pipe_gap]
 
-
     def update(self):
         """
         Update Pipe Position
@@ -258,7 +189,7 @@ def create_pipe():
     pipe_height = random.randint(-pipe_variety, pipe_variety)
     # Create one top and one bottom pipe
     bottom_pipe = Pipe(WINDOW_WIDTH, MIDDLE_HEIGHT + pipe_height, 'bottom')
-    top_pipe = Pipe(WINDOW_WIDTH, MIDDLE_HEIGHT+ pipe_height, 'top')
+    top_pipe = Pipe(WINDOW_WIDTH, MIDDLE_HEIGHT + pipe_height, 'top')
     # add pipes to pipe group
     pipe_group.add(bottom_pipe)
     pipe_group.add(top_pipe)
@@ -268,7 +199,7 @@ def create_pipe():
 class Button:
     def __init__(self, x, y, image):
         """
-        Initialize Pipe Attributes
+        Initialize Button Attributes
         :param x: int, button x position
         :param y: int, button y coordinate
         :param image: pygame image
@@ -304,7 +235,7 @@ class Button:
 def reset(image=bird_img):
     """
     Reset game variables
-    :param pygame image, which image to redraw flappy as
+    :param image: pygame image, which image to redraw flappy as
     :return: None
     """
     global score
@@ -319,45 +250,12 @@ def reset(image=bird_img):
     flappy.image = image
     # Reset Score
     score = 0
-    # Reset the gameover variable to false
+    # Reset the game over variable to false
     game_over = False
     # Reset the death sound played variable to false
     sound_played = False
     # If the difficulty or game mode is changed, set score to 0
 
-
-
-def change_difficulty(difficulty):
-    """
-    Change the difficulty of the game by changing distance between pipes
-    :param difficulty:
-    :return: None
-    """
-    global time_between_pipe
-    if difficulty == 1:
-        time_between_pipe = 1500
-    if difficulty == 2:
-        time_between_pipe = 1250
-    if difficulty == 3:
-        time_between_pipe = 1000
-    if difficulty == 4:
-        time_between_pipe = 750
-
-def draw_difficulty(time_between_pipe, x, y):
-    if time_between_pipe == 1500:
-        window.blit(difficulty1_img, (x, y))
-    if time_between_pipe == 1250:
-        window.blit(difficulty2_img, (x, y))
-    if time_between_pipe == 1000:
-        window.blit(difficulty3_img, (x, y))
-    if time_between_pipe == 750:
-        window.blit(difficulty4_img, (x, y))
-
-def draw_mode(antigravity, x, y):
-    if antigravity is True:
-        window.blit(antigravity_button_img, (x, y))
-    if antigravity is False:
-        window.blit(normal_button_img, (x, y))
 
 # Create pipe and bird groups
 bird_group = pygame.sprite.Group()
@@ -376,12 +274,13 @@ antigravity_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, antigravity_button
 normal_button = Button(MIDDLE_WIDTH, MIDDLE_HEIGHT + 50, normal_button_img)
 
 # Difficulty Buttons
-difficulty1_button = Button(MIDDLE_WIDTH - 75, MIDDLE_HEIGHT + 200, difficulty1_img)
-difficulty2_button = Button(MIDDLE_WIDTH - 25, MIDDLE_HEIGHT + 200, difficulty2_img)
-difficulty3_button = Button(MIDDLE_WIDTH + 25, MIDDLE_HEIGHT + 200, difficulty3_img)
-difficulty4_button = Button(MIDDLE_WIDTH + 75, MIDDLE_HEIGHT + 200, difficulty4_img)
+difficulty1_button = Button(MIDDLE_WIDTH - 75, MIDDLE_HEIGHT + 200, difficulty_images[0])
+difficulty2_button = Button(MIDDLE_WIDTH - 25, MIDDLE_HEIGHT + 200, difficulty_images[1])
+difficulty3_button = Button(MIDDLE_WIDTH + 25, MIDDLE_HEIGHT + 200, difficulty_images[2])
+difficulty4_button = Button(MIDDLE_WIDTH + 75, MIDDLE_HEIGHT + 200, difficulty_images[3])
 
 emma_button = Button(0, 900, emma_img)
+
 
 def check_score():
     """
@@ -435,7 +334,8 @@ if __name__ == '__main__':
         bird_group.update()
 
         # animate ground
-        draw_ground(window, ground)
+        draw_ground(window, ground, ground_coordinate)
+
         # if the bird is flying
         if is_flying:
             # move the ground
@@ -515,16 +415,16 @@ if __name__ == '__main__':
             # change difficulty
 
             if difficulty1_button.draw() is True:
-                change_difficulty(1)
+                time_between_pipe = change_difficulty(1)
                 reset()
             if difficulty2_button.draw() is True:
-                change_difficulty(2)
+                time_between_pipe = change_difficulty(2)
                 reset()
             if difficulty3_button.draw() is True:
-                change_difficulty(3)
+                time_between_pipe = change_difficulty(3)
                 reset()
             if difficulty4_button.draw() is True:
-                change_difficulty(4)
+                time_between_pipe = change_difficulty(4)
                 reset()
             if emma_button.draw() is True:
                 reset(image=emma_img)
@@ -554,19 +454,17 @@ if __name__ == '__main__':
                         flappy.jump()
 
         # draw the scores
-        draw_text('High Score:', font, 20, 10)
-        draw_score(high_score, 220, 25)
-        draw_text('Current Score:', font, 500, 10)
-        draw_score(score, 750, 25)
-        draw_text('Mode:', font, 20, 65)
-        draw_mode(flappy.antigravity, 140, 75)
-        draw_text('Difficulty:', font, 20, 120)
-        draw_difficulty(time_between_pipe, 180, 130)
-
+        draw_text(window, WHITE, 'High Score:', font, 20, 10)
+        draw_score(window, high_score, num_images, 220, 25)
+        draw_text(window, WHITE, 'Current Score:', font, 500, 10)
+        draw_score(window, score, num_images, 750, 25)
+        draw_text(window, WHITE, 'Mode:', font, 20, 65)
+        draw_mode(window, flappy.antigravity, antigravity_button_img, normal_button_img, 140, 75)
+        draw_text(window, WHITE, 'Difficulty:', font, 20, 120)
+        draw_difficulty(window, difficulty_images, time_between_pipe, 180, 130)
 
         # Update the display
         pygame.display.update()
     # if the game is over,
     # delete the screen
     pygame.quit()
-
