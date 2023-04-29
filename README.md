@@ -5,9 +5,8 @@ This is a clone of the popular game Flappy Bird, made using Python and Pygame. T
 ## Installation
 
 1. Clone the repository or download the zip file.
-2. Install the required packages: `pip install -r requirements.txt`
-3. Naviagate to directory
-4. Run the game: `python main.py`
+2. Navigate to directory
+3. Run the game: `python main.py`
 
 ## How to Play
 
