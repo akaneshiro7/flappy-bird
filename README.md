@@ -26,7 +26,7 @@ Antigravity mode is a special mode where gravity is reversed, making the bird fl
 
 ## Sound Effects
 
-The game includes sound effects for the bird flapping its wings and colliding with a pipe.
+The game includes sound effects for the bird flapping its wings, increasing score, and colliding with a pipe.
 
 ## Credits
 
