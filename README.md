@@ -1,7 +1,7 @@
 # Flappy Bird Clone with Python and Pygame
 
 This is a clone of the popular game Flappy Bird, made using Python and Pygame. The game includes difficulty settings, high score tracking, antigravity mode, and sound effects.
-
+![](https://github.com/akaneshiro7/flappy-bird/blob/main/flappy-bird-nocut.gif)
 ## Installation
 
 1. Clone the repository or download the zip file.
